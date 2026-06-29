@@ -82,6 +82,99 @@ export function summarize(transactions: Transaction[]) {
   };
 }
 
+export type CategoryBreakdown = {
+  category: string;
+  amount: number;
+  percentage: number;
+};
+
+export function categoryBreakdown(
+  transactions: Transaction[],
+  type: TransactionType = "expense",
+): CategoryBreakdown[] {
+  const filtered = transactions.filter((t) => t.type === type);
+  const total = filtered.reduce((sum, t) => sum + t.amount, 0);
+
+  const byCategory = filtered.reduce<Record<string, number>>((acc, t) => {
+    acc[t.category] = (acc[t.category] ?? 0) + t.amount;
+    return acc;
+  }, {});
+
+  return Object.entries(byCategory)
+    .map(([category, amount]) => ({
+      category,
+      amount,
+      percentage: total > 0 ? (amount / total) * 100 : 0,
+    }))
+    .sort((a, b) => b.amount - a.amount);
+}
+
+export type SortField = "date" | "amount" | "description";
+export type SortDirection = "asc" | "desc";
+
+export function filterAndSortTransactions(
+  transactions: Transaction[],
+  options: {
+    search?: string;
+    type?: TransactionType | "all";
+    category?: string | "all";
+    sortField?: SortField;
+    sortDirection?: SortDirection;
+  },
+): Transaction[] {
+  let result = [...transactions];
+
+  if (options.search?.trim()) {
+    const q = options.search.trim().toLowerCase();
+    result = result.filter(
+      (t) =>
+        t.description.toLowerCase().includes(q) ||
+        t.category.toLowerCase().includes(q),
+    );
+  }
+
+  if (options.type && options.type !== "all") {
+    result = result.filter((t) => t.type === options.type);
+  }
+
+  if (options.category && options.category !== "all") {
+    result = result.filter((t) => t.category === options.category);
+  }
+
+  const field = options.sortField ?? "date";
+  const direction = options.sortDirection ?? "desc";
+  const multiplier = direction === "asc" ? 1 : -1;
+
+  result.sort((a, b) => {
+    if (field === "date") {
+      return (
+        multiplier *
+        (new Date(a.date).getTime() - new Date(b.date).getTime())
+      );
+    }
+    if (field === "amount") {
+      return multiplier * (a.amount - b.amount);
+    }
+    return multiplier * a.description.localeCompare(b.description);
+  });
+
+  return result;
+}
+
+export function toDateInputValue(date: Date): string {
+  const y = date.getFullYear();
+  const m = String(date.getMonth() + 1).padStart(2, "0");
+  const d = String(date.getDate()).padStart(2, "0");
+  return `${y}-${m}-${d}`;
+}
+
+export function monthDateBounds(year: number, month: number) {
+  return {
+    min: toDateInputValue(new Date(year, month, 1)),
+    max: toDateInputValue(new Date(year, month + 1, 0)),
+  };
+}
+
 export function createId(): string {
   return crypto.randomUUID();
 }
