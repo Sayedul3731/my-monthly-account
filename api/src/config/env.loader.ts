@@ -15,7 +15,7 @@ function resolveEnvPath(): string {
 
 export const ENV_FILE_PATH = resolveEnvPath();
 
-const result = config({ path: ENV_FILE_PATH });
+const result = config({ path: ENV_FILE_PATH, quiet: true });
 
 if (result.error && existsSync(ENV_FILE_PATH)) {
   throw result.error;
