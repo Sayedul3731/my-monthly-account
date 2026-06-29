@@ -7,6 +7,7 @@ import {
   HttpStatus,
   Param,
   ParseUUIDPipe,
+  Patch,
   Post,
   Query,
 } from '@nestjs/common';
@@ -20,6 +21,7 @@ import {
 } from '@nestjs/swagger';
 import { CreateTransactionDto } from './dto/create-transaction.dto';
 import { TransactionQueryDto } from './dto/transaction-query.dto';
+import { UpdateTransactionDto } from './dto/update-transaction.dto';
 import { Transaction } from './transaction.entity';
 import { TransactionsService } from './transactions.service';
 
@@ -58,6 +60,18 @@ export class TransactionsController {
   @ApiOkResponse({ type: Transaction })
   create(@Body() dto: CreateTransactionDto) {
     return this.transactionsService.create(dto);
+  }
+
+  @Patch(':id')
+  @ApiOperation({ summary: 'Update a transaction' })
+  @ApiParam({ name: 'id', format: 'uuid' })
+  @ApiOkResponse({ type: Transaction })
+  @ApiNotFoundResponse({ description: 'Transaction not found' })
+  update(
+    @Param('id', ParseUUIDPipe) id: string,
+    @Body() dto: UpdateTransactionDto,
+  ) {
+    return this.transactionsService.update(id, dto);
   }
 
   @Delete(':id')

@@ -2,6 +2,7 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Between, Repository } from 'typeorm';
 import { CreateTransactionDto } from './dto/create-transaction.dto';
+import { UpdateTransactionDto } from './dto/update-transaction.dto';
 import { Transaction, TransactionType } from './transaction.entity';
 
 @Injectable()
@@ -45,6 +46,18 @@ export class TransactionsService {
       ...dto,
       date: new Date(dto.date),
     });
+
+    return this.transactionsRepository.save(transaction);
+  }
+
+  async update(id: string, dto: UpdateTransactionDto): Promise<Transaction> {
+    const transaction = await this.findOne(id);
+
+    if (dto.type !== undefined) transaction.type = dto.type;
+    if (dto.amount !== undefined) transaction.amount = dto.amount;
+    if (dto.description !== undefined) transaction.description = dto.description;
+    if (dto.category !== undefined) transaction.category = dto.category;
+    if (dto.date !== undefined) transaction.date = new Date(dto.date);
 
     return this.transactionsRepository.save(transaction);
   }

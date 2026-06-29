@@ -5,6 +5,8 @@ import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import configuration from './config/configuration';
 import { ENV_FILE_PATH } from './config/env.loader';
+import { Budget } from './budgets/budget.entity';
+import { BudgetsModule } from './budgets/budgets.module';
 import { Transaction } from './transactions/transaction.entity';
 import { TransactionsModule } from './transactions/transactions.module';
 
@@ -25,11 +27,12 @@ import { TransactionsModule } from './transactions/transactions.module';
         username: config.get<string>('database.username'),
         password: config.get<string>('database.password'),
         database: config.get<string>('database.name'),
-        entities: [Transaction],
+        entities: [Transaction, Budget],
         synchronize: config.get<string>('nodeEnv') !== 'production',
       }),
     }),
     TransactionsModule,
+    BudgetsModule,
   ],
   controllers: [AppController],
   providers: [AppService],
