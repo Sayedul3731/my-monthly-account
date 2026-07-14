@@ -11,6 +11,7 @@ import { AuthService } from './auth.service';
 import { CurrentUser } from './decorators/current-user.decorator';
 import { Public } from './decorators/public.decorator';
 import { AuthResponseDto } from './dto/auth-response.dto';
+import { CurrentUserDto } from './dto/current-user.dto';
 import { LoginDto } from './dto/login.dto';
 import { RegisterDto } from './dto/register.dto';
 import type { AuthenticatedUser } from './jwt-payload.interface';
@@ -40,6 +41,8 @@ export class AuthController {
   @Get('me')
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Get the currently authenticated user' })
+  @ApiOkResponse({ type: CurrentUserDto })
+  @ApiUnauthorizedResponse({ description: 'Missing or invalid access token' })
   me(@CurrentUser() user: AuthenticatedUser) {
     return user;
   }
