@@ -9,4 +9,8 @@ export default () => ({
     password: process.env.DB_PASSWORD ?? 'postgres',
     name: process.env.DB_NAME ?? 'monthly_account',
   },
+  jwt: {
+    secret: process.env.JWT_SECRET ?? 'dev-secret-change-me',
+    expiresIn: process.env.JWT_EXPIRES_IN ?? '1d',
+  },
 });

@@ -1,20 +1,13 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import {
-  Column,
-  CreateDateColumn,
-  Entity,
-  PrimaryGeneratedColumn,
-  Unique,
-  UpdateDateColumn,
-} from 'typeorm';
+import { Column, Entity, Index } from 'typeorm';
+import { BaseEntity } from '../common/entities/base.entity';
 
 @Entity('budgets')
-@Unique(['year', 'month', 'category'])
-export class Budget {
-  @ApiProperty({ format: 'uuid' })
-  @PrimaryGeneratedColumn('uuid')
-  id: string;
-
+@Index(['year', 'month', 'category'], {
+  unique: true,
+  where: '"deletedAt" IS NULL',
+})
+export class Budget extends BaseEntity {
   @ApiProperty({ example: 2026 })
   @Column({ type: 'int' })
   year: number;
@@ -41,12 +34,4 @@ export class Budget {
     },
   })
   amount: number;
-
-  @ApiProperty({ format: 'date-time' })
-  @CreateDateColumn({ type: 'timestamptz' })
-  createdAt: Date;
-
-  @ApiProperty({ format: 'date-time' })
-  @UpdateDateColumn({ type: 'timestamptz' })
-  updatedAt: Date;
 }

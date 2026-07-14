@@ -19,6 +19,8 @@ import {
   ApiParam,
   ApiTags,
 } from '@nestjs/swagger';
+import { CurrentUser } from '../auth/decorators/current-user.decorator';
+import type { AuthenticatedUser } from '../auth/jwt-payload.interface';
 import { CreateTransactionDto } from './dto/create-transaction.dto';
 import { TransactionQueryDto } from './dto/transaction-query.dto';
 import { UpdateTransactionDto } from './dto/update-transaction.dto';
@@ -33,17 +35,27 @@ export class TransactionsController {
   @Get()
   @ApiOperation({ summary: 'List transactions, optionally filtered by month' })
   @ApiOkResponse({ type: Transaction, isArray: true })
-  findAll(@Query() query: TransactionQueryDto) {
-    return this.transactionsService.findAll(query.year, query.month);
+  findAll(
+    @CurrentUser() user: AuthenticatedUser,
+    @Query() query: TransactionQueryDto,
+  ) {
+    return this.transactionsService.findAll(
+      user.userId,
+      query.year,
+      query.month,
+    );
   }
 
   @Get('summary')
   @ApiOperation({ summary: 'Get income, expenses, and balance for a month' })
-  getSummary(@Query() query: TransactionQueryDto) {
+  getSummary(
+    @CurrentUser() user: AuthenticatedUser,
+    @Query() query: TransactionQueryDto,
+  ) {
     const year = query.year ?? new Date().getFullYear();
     const month = query.month ?? new Date().getMonth();
 
-    return this.transactionsService.getSummary(year, month);
+    return this.transactionsService.getSummary(user.userId, year, month);
   }
 
   @Get(':id')
@@ -51,15 +63,21 @@ export class TransactionsController {
   @ApiParam({ name: 'id', format: 'uuid' })
   @ApiOkResponse({ type: Transaction })
   @ApiNotFoundResponse({ description: 'Transaction not found' })
-  findOne(@Param('id', ParseUUIDPipe) id: string) {
-    return this.transactionsService.findOne(id);
+  findOne(
+    @Param('id', ParseUUIDPipe) id: string,
+    @CurrentUser() user: AuthenticatedUser,
+  ) {
+    return this.transactionsService.findOne(id, user.userId);
   }
 
   @Post()
   @ApiOperation({ summary: 'Create a transaction' })
   @ApiOkResponse({ type: Transaction })
-  create(@Body() dto: CreateTransactionDto) {
-    return this.transactionsService.create(dto);
+  create(
+    @CurrentUser() user: AuthenticatedUser,
+    @Body() dto: CreateTransactionDto,
+  ) {
+    return this.transactionsService.create(user.userId, dto);
   }
 
   @Patch(':id')
@@ -69,9 +87,10 @@ export class TransactionsController {
   @ApiNotFoundResponse({ description: 'Transaction not found' })
   update(
     @Param('id', ParseUUIDPipe) id: string,
+    @CurrentUser() user: AuthenticatedUser,
     @Body() dto: UpdateTransactionDto,
   ) {
-    return this.transactionsService.update(id, dto);
+    return this.transactionsService.update(id, user.userId, dto);
   }
 
   @Delete(':id')
@@ -80,7 +99,10 @@ export class TransactionsController {
   @ApiParam({ name: 'id', format: 'uuid' })
   @ApiNoContentResponse({ description: 'Transaction deleted' })
   @ApiNotFoundResponse({ description: 'Transaction not found' })
-  remove(@Param('id', ParseUUIDPipe) id: string) {
-    return this.transactionsService.remove(id);
+  remove(
+    @Param('id', ParseUUIDPipe) id: string,
+    @CurrentUser() user: AuthenticatedUser,
+  ) {
+    return this.transactionsService.remove(id, user.userId);
   }
 }

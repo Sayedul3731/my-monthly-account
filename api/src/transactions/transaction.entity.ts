@@ -1,26 +1,42 @@
 import { ApiProperty } from '@nestjs/swagger';
-import {
-  Column,
-  CreateDateColumn,
-  Entity,
-  PrimaryGeneratedColumn,
-  UpdateDateColumn,
-} from 'typeorm';
-
-export enum TransactionType {
-  INCOME = 'income',
-  EXPENSE = 'expense',
-}
+import { Column, Entity, Index, JoinColumn, ManyToOne } from 'typeorm';
+import { Category } from '../categories/category.entity';
+import { BaseEntity } from '../common/entities/base.entity';
+import { TransactionTypeEntity } from '../transaction-types/transaction-type.entity';
+import { User } from '../users/user.entity';
 
 @Entity('transactions')
-export class Transaction {
+@Index(['userId', 'date'])
+export class Transaction extends BaseEntity {
   @ApiProperty({ format: 'uuid' })
-  @PrimaryGeneratedColumn('uuid')
-  id: string;
+  @Column({ type: 'uuid' })
+  userId: string;
 
-  @ApiProperty({ enum: TransactionType })
-  @Column({ type: 'enum', enum: TransactionType })
-  type: TransactionType;
+  @ApiProperty({ type: User })
+  @ManyToOne(() => User, { eager: true, onDelete: 'CASCADE' })
+  @JoinColumn({ name: 'userId' })
+  user: User;
+
+  @ApiProperty({ format: 'uuid' })
+  @Column({ type: 'uuid' })
+  categoryId: string;
+
+  @ApiProperty({ type: Category })
+  @ManyToOne(() => Category, { eager: true, onDelete: 'RESTRICT' })
+  @JoinColumn({ name: 'categoryId' })
+  category: Category;
+
+  @ApiProperty({ format: 'uuid' })
+  @Column({ type: 'uuid' })
+  transactionTypeId: string;
+
+  @ApiProperty({ type: TransactionTypeEntity })
+  @ManyToOne(() => TransactionTypeEntity, {
+    eager: true,
+    onDelete: 'RESTRICT',
+  })
+  @JoinColumn({ name: 'transactionTypeId' })
+  transactionType: TransactionTypeEntity;
 
   @ApiProperty({ example: 49.99 })
   @Column({
@@ -38,19 +54,7 @@ export class Transaction {
   @Column({ length: 255 })
   description: string;
 
-  @ApiProperty({ example: 'Food' })
-  @Column({ length: 100 })
-  category: string;
-
   @ApiProperty({ format: 'date-time' })
   @Column({ type: 'timestamptz' })
   date: Date;
-
-  @ApiProperty({ format: 'date-time' })
-  @CreateDateColumn({ type: 'timestamptz' })
-  createdAt: Date;
-
-  @ApiProperty({ format: 'date-time' })
-  @UpdateDateColumn({ type: 'timestamptz' })
-  updatedAt: Date;
 }

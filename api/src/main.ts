@@ -1,6 +1,6 @@
-import { ValidationPipe } from '@nestjs/common';
+import { ClassSerializerInterceptor, ValidationPipe } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { NestFactory } from '@nestjs/core';
+import { NestFactory, Reflector } from '@nestjs/core';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { AppModule } from './app.module';
 import { ENV_FILE_PATH } from './config/env.loader';
@@ -28,7 +28,7 @@ async function bootstrap() {
 
   app.enableCors({
     origin: frontendUrl,
-    methods: ['GET', 'POST', 'DELETE', 'OPTIONS'],
+    methods: ['GET', 'POST', 'PATCH', 'DELETE', 'OPTIONS'],
   });
 
   app.useGlobalPipes(
@@ -39,6 +39,12 @@ async function bootstrap() {
     }),
   );
 
+  // Ensures @Exclude()-marked fields (e.g. User.password) are stripped from
+  // every response, not just controllers that opt in individually.
+  app.useGlobalInterceptors(
+    new ClassSerializerInterceptor(app.get(Reflector)),
+  );
+
   if (swaggerEnabled) {
     const document = SwaggerModule.createDocument(
       app,
@@ -46,6 +52,7 @@ async function bootstrap() {
         .setTitle('Monthly Account API')
         .setDescription('API for tracking monthly income and expenses')
         .setVersion('1.0')
+        .addBearerAuth()
         .build(),
     );
     SwaggerModule.setup('docs', app, document);

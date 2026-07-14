@@ -41,6 +41,6 @@ export class BudgetsService {
   }
 
   async remove(id: string): Promise<void> {
-    await this.budgetsRepository.delete(id);
+    await this.budgetsRepository.softDelete(id);
   }
 }
