@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import {
   fetchBudgets,
@@ -116,13 +117,23 @@ export default function MonthlyAccount() {
   return (
     <div className="mx-auto w-full max-w-2xl px-4 py-8 sm:px-6">
       <header className="mb-6 flex items-center justify-between">
-        <div>
-          <p className="text-sm font-medium text-emerald-600 dark:text-emerald-400">
-            Monthly Tracker
-          </p>
-          <h1 className="text-2xl font-bold tracking-tight text-zinc-900 dark:text-white">
-            My Account
-          </h1>
+        <div className="flex items-center gap-3">
+          <Image
+            src="/logo.png"
+            alt="My Account logo"
+            width={40}
+            height={40}
+            className="h-10 w-10 rounded-xl object-contain"
+            priority
+          />
+          <div>
+            <p className="text-sm font-medium text-emerald-600 dark:text-emerald-400">
+              Monthly Tracker
+            </p>
+            <h1 className="text-2xl font-bold tracking-tight text-zinc-900 dark:text-white">
+              My Account
+            </h1>
+          </div>
         </div>
         <div className="flex items-center gap-1 rounded-full border border-zinc-200 bg-white p-1 shadow-sm dark:border-zinc-800 dark:bg-zinc-900">
           <button

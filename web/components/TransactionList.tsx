@@ -35,7 +35,7 @@ export default function TransactionList({
   const [sortDirection, setSortDirection] = useState<SortDirection>("desc");
 
   const allCategories = useMemo(
-    () => [...INCOME_CATEGORIES, ...EXPENSE_CATEGORIES],
+    () => [...new Set([...INCOME_CATEGORIES, ...EXPENSE_CATEGORIES])],
     [],
   );
 
